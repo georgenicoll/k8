@@ -1,0 +1,33 @@
+# Adapted to a deployment from https://github.com/kubernetes/examples/blob/master/staging/volumes/nfs/nfs-busybox-rc.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-busybox
+  labels:
+    app: nfs-busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-busybox
+  strategy: { }
+  template:
+    metadata:
+      labels:
+        app: nfs-busybox
+    spec:
+      containers:
+        - image: busybox
+          command:
+            - sh
+            - -c
+            - 'while true; do date > /mnt/index.html; hostname >> /mnt/index.html; sleep $(($RANDOM % 5 + 5)); done'
+          imagePullPolicy: IfNotPresent
+          name: nfs-busybox
+          volumeMounts:
+            - name: gorilla-nfs
+              mountPath: "/mnt"
+      volumes:
+        - name: gorilla-nfs
+          persistentVolumeClaim:
+            claimName: gorilla-nfs

@@ -1,0 +1,66 @@
+---
+# Internal service 'nfs'
+apiVersion: v1
+kind: Service
+metadata:
+  name: gorilla-nfs
+spec:
+  ports:
+    - protocol: TCP
+      port: 2049
+      targetPort: 2049
+      name: tcp-2049
+    - protocol: UDP
+      port: 2049
+      targetPort: 2049
+      name: udp-2049
+---
+# External endpoint for 'nfs'
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: gorilla-nfs
+subsets:
+  - addresses:
+      - ip: 10.0.0.10
+    ports:
+      - protocol: TCP
+        port: 2049
+        name: tcp-2049
+      - protocol: UDP
+        port: 2049
+        name: udp-2049
+---
+#Persistent Volume using 'nfs' service (data to go under k8 directory)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gorilla-nfs
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.0.0.10 #Directly connecting out here - can we go via the k8 service above?
+    path: "/mnt/md0/k8data"
+---
+#Persistent Volume Claim for 'nfs'
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gorilla-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Mi
+---
+
+
+
+
+
+
